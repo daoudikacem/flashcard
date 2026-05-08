@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق البطاقات التعليمية - معاينة</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-frame {
+            width: 375px;
+            height: 750px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #6200EE;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .app-bar {
+            height: 56px;
+            background: #6200EE;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-bar h1 {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .content {
+            height: calc(100% - 100px);
+            overflow-y: auto;
+            padding: 16px;
+            background: #f5f5f5;
+        }
+
+        .fab {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 56px;
+            height: 56px;
+            background: #03DAC5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        .group-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .group-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .group-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .group-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .group-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #6200EE;
+            color: white;
+        }
+
+        .btn-success {
+            background: #03DAC5;
+            color: white;
+        }
+
+        .flashcard {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 40px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .flashcard:hover {
+            transform: scale(1.02);
+        }
+
+        .flashcard.flipped {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .difficulty-buttons .btn {
+            flex: 1;
+            padding: 12px;
+        }
+
+        .btn-easy { background: #4CAF50; color: white; }
+        .btn-medium { background: #FF9800; color: white; }
+        .btn-hard { background: #F44336; color: white; }
+
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #6200EE;
+            transition: width 0.3s;
+        }
+
+        .hidden { display: none; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .dialog h2 {
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #6200EE;
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .dialog-actions .btn {
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <div class="status-bar">
+            <span>9:41</span>
+            <span>●●●● WiFi 🔋</span>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <div class="app-bar">
+                <h1>المجموعات</h1>
+                <div>
+                    <button class="btn btn-primary" onclick="showExamScreen()" style="margin-left: 8px;">🎓</button>
+                    <button class="btn btn-primary" onclick="showStatsScreen()">📊</button>
+                </div>
+            </div>
+            <div class="content" id="groupsList">
+                <!-- Groups will be rendered here -->
+            </div>
+            <div class="fab" onclick="showCreateGroupDialog()">+</div>
+        </div>
+
+        <!-- Study Screen -->
+        <div id="studyScreen" class="screen">
+            <div class="app-bar">
+                <button class="btn" onclick="showHome()" style="background: transparent; color: white;">→ رجوع</button>
+                <h1>وضع الدراسة</h1>
+            </div>
+            <div class="content">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div id="cardCounter" style="text-align: center; margin-bottom: 16px; color: #666;"></div>
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div id="cardContent">اضغط لبدء الدراسة</div>
+                </div>
+                <div class="difficulty-buttons hidden" id="difficultyButtons">
+                    <button class="btn btn-easy" onclick="rateCard(1)">سهل</button>
+                    <button class="btn btn-medium" onclick="rateCard(2)">متوسط</button>
+                    <button class="btn btn-hard" onclick="rateCard(3)">صعب</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Screen -->
+        <div id="statsScreen" class="screen">
+            <div class="app-bar">
+                <button class="btn" onclick="showHome()" style="background: transparent; color: white;">→ رجوع</button>
+                <h1>الإحصائيات</h1>
+            </div>
+            <div class="content" id="statsContent">
+                <!-- Stats will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Dialog -->
+    <div id="createGroupDialog" class="hidden">
+        <div class="dialog-overlay" onclick="hideCreateGroupDialog()"></div>
+        <div class="dialog">
+            <h2>إنشاء مجموعة جديدة</h2>
+            <input type="text" id="groupName" class="input-field" placeholder="اسم المجموعة">
+            <input type="text" id="groupDesc" class="input-field" placeholder="الوصف (اختياري)">
+            <div class="dialog-actions">
+                <button class="btn btn-cancel" onclick="hideCreateGroupDialog()">إلغاء</button>
+                <button class="btn btn-primary" onclick="createGroup()">إنشاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Store
+        let groups = [];
+        let flashcards = {};
+        let currentGroup = null;
+        let currentCardIndex = 0;
+        let isFlipped = false;
+
+        // Initialize with sample data
+        function initSampleData() {
+            groups = [
+                { id: 1, name: 'اللغة الإنجليزية', description: 'كلمات جديدة', cardCount: 5 },
+                { id: 2, name: 'البرمجة', description: 'مفاهيم أساسية', cardCount: 3 }
+            ];
+            
+            flashcards = {
+                1: [
+                    { question: 'ما معنى Book؟', answer: 'كتاب' },
+                    { question: 'ما معنى Computer؟', answer: 'حاسوب' },
+                    { question: 'ما معنى School؟', answer: 'مدرسة' },
+                    { question: 'ما معنى Teacher؟', answer: 'معلم' },
+                    { question: 'ما معنى Student؟', answer: 'طالب' }
+                ],
+                2: [
+                    { question: 'ما هي Variable؟', answer: 'متغير لتخزين البيانات' },
+                    { question: 'ما هو Function؟', answer: 'دالة لتنفيذ مهمة محددة' },
+                    { question: 'ما هو Loop؟', answer: 'تكرار تنفيذ كود معين' }
+                ]
+            };
+        }
+
+        // Render Groups
+        function renderGroups() {
+            const container = document.getElementById('groupsList');
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #999;">
+                        <div style="font-size: 64px; margin-bottom: 16px;">📁</div>
+                        <p>لا توجد مجموعات</p>
+                        <p style="font-size: 14px;">اضغط على + لإنشاء مجموعة جديدة</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = groups.map(group => `
+                <div class="group-card" onclick="openGroup(${group.id})">
+                    <h3>${group.name}</h3>
+                    <p>${group.description}</p>
+                    <div class="group-actions">
+                        <span class="badge">${group.cardCount} بطاقة</span>
+                        <button class="btn btn-success" onclick="event.stopPropagation(); startStudy(${group.id})">
+                            ▶ دراسة
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Navigation
+        function showHome() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('homeScreen').classList.add('active');
+            renderGroups();
+        }
+
+        function showExamScreen() {
+            alert('وضع الامتحان - اختر مجموعة للبدء!');
+        }
+
+        function showStatsScreen() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('statsScreen').classList.add('active');
+            
+            const totalCards = groups.reduce((sum, g) => sum + g.cardCount, 0);
+            document.getElementById('statsContent').innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">📁</div>
+                        <div style="font-size: 24px; font-weight: bold;">${groups.length}</div>
+                        <div style="color: #666; font-size: 14px;">المجموعات</div>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">⭐</div>
+                        <div style="font-size: 24px; font-weight: bold;">${totalCards}</div>
+                        <div style="color: #666; font-size: 14px;">البطاقات</div>
+                    </div>
+                </div>
+                <div style="background: white; padding: 20px; border-radius: 12px;">
+                    <h3 style="margin-bottom: 16px;">توزيع الصعوبة</h3>
+                    <p style="color: #666;">ستظهر الإحصائيات بعد البدء في الدراسة</p>
+                </div>
+            `;
+        }
+
+        // Study Mode
+        function startStudy(groupId) {
+            currentGroup = groupId;
+            currentCardIndex = 0;
+            isFlipped = false;
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('studyScreen').classList.add('active');
+            
+            showCard();
+        }
+
+        function showCard() {
+            const cards = flashcards[currentGroup];
+            if (!cards || cards.length === 0) return;
+
+            const card = cards[currentCardIndex];
+            document.getElementById('cardContent').textContent = card.question;
+            document.getElementById('flashcard').classList.remove('flipped');
+            document.getElementById('difficultyButtons').classList.add('hidden');
+            document.getElementById('cardCounter').textContent = 
+                `بطاقة ${currentCardIndex + 1} من ${cards.length}`;
+            
+            const progress = ((currentCardIndex + 1) / cards.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            isFlipped = false;
+        }
+
+        function flipCard() {
+            const card = flashcards[currentGroup][currentCardIndex];
+            const flashcardEl = document.getElementById('flashcard');
+            
+            if (!isFlipped) {
+                document.getElementById('cardContent').textContent = card.answer;
+                flashcardEl.classList.add('flipped');
+                document.getElementById('difficultyButtons').classList.remove('hidden');
+                isFlipped = true;
+            }
+        }
+
+        function rateCard(difficulty) {
+            const cards = flashcards[currentGroup];
+            if (currentCardIndex < cards.length - 1) {
+                currentCardIndex++;
+                showCard();
+            } else {
+                alert('أحسنت! أكملت هذه الدفعة 🎉');
+                showHome();
+            }
+        }
+
+        // Create Group
+        function showCreateGroupDialog() {
+            document.getElementById('createGroupDialog').classList.remove('hidden');
+        }
+
+        function hideCreateGroupDialog() {
+            document.getElementById('createGroupDialog').classList.add('hidden');
+            document.getElementById('groupName').value = '';
+            document.getElementById('groupDesc').value = '';
+        }
+
+        function createGroup() {
+            const name = document.getElementById('groupName').value;
+            const desc = document.getElementById('groupDesc').value;
+            
+            if (!name) {
+                alert('الرجاء إدخال اسم المجموعة');
+                return;
+            }
+
+            const newGroup = {
+                id: Date.now(),
+                name: name,
+                description: desc,
+                cardCount: 0
+            };
+
+            groups.push(newGroup);
+            flashcards[newGroup.id] = [];
+            hideCreateGroupDialog();
+            renderGroups();
+        }
+
+        function openGroup(groupId) {
+            alert('سيتم فتح قائمة البطاقات - هذه نسخة معاينة فقط');
+        }
+
+        // Initialize
+        initSampleData();
+        renderGroups();
+    </script>
+</body>
+</html>

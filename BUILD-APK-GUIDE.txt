@@ -1,0 +1,130 @@
+========================================
+كيفية بناء APK بدون Android Studio
+========================================
+
+الطريقة 1: استخدام السكربت الجاهز (الأسهل) ⭐
+=============================================
+
+1. تأكد من تثبيت Java JDK 17 أو أحدث:
+   - تحقق: افتح CMD واكتب: java -version
+   - إذا لم يكن مثبتاً: حمل من https://adoptium.net/
+
+2. انقر مرتين على ملف: build-apk.bat
+
+3. انتظر حتى ينتهي البناء (قد يستغرق 5-10 دقائق أول مرة)
+
+4. ستجد APK هنا:
+   app\build\outputs\apk\debug\app-debug.apk
+
+5. انقل الملف إلى هاتفك وثبته!
+
+
+الطريقة 2: استخدام Terminal يدوياً
+====================================
+
+افتح PowerShell أو CMD في مجلد المشروع:
+
+cd e:\تعليم\PROGRAMMATION\flashcard
+
+# بناء Debug APK
+.\gradlew.bat clean
+.\gradlew.bat assembleDebug
+
+# أو بناء Release APK
+.\gradlew.bat assembleRelease
+
+
+الطريقة 3: استخدام خدمات بناء أونلاين
+========================================
+
+إذا لم يكن لديك Java:
+
+أ) Codemagic.io:
+   1. ارفع المشروع على GitHub
+   2. اربطه بـ Codemagic
+   3. سيتم البناء تلقائياً
+   4. حمّل APK
+
+ب) GitHub Actions:
+   1. أنشئ ملف .github/workflows/build.yml
+   2. ارفع الكود
+   3. سيتم البناء تلقائياً
+
+
+الطريقة 4: استخدام Android Studio Command Line فقط
+==================================================
+
+بدون فتح Android Studio:
+
+1. حمّل Android Studio Command Line Tools فقط
+2. فك الضغط
+3. أضف المسار إلى PATH
+4. استخدم الأوامر أعلاه
+
+
+تثبيت APK على الهاتف
+=====================
+
+1. فعّل "مصادر غير معروفة" في إعدادات الهاتف
+2. انقل ملف APK إلى الهاتف
+3. افتح الملف واضغط "تثبيت"
+4. افتح التطبيق!
+
+
+لبناء APK للتوقيع (Release)
+============================
+
+1. أنشئ keystore:
+   keytool -genkey -v -keystore flashcard.keystore -alias flashcard -keyalg RSA -keysize 2048 -validity 10000
+
+2. عدّل app/build.gradle.kts وأضف:
+   signingConfigs {
+       create("release") {
+           storeFile = file("../flashcard.keystore")
+           storePassword = "your_password"
+           keyAlias = "flashcard"
+           keyPassword = "your_password"
+       }
+   }
+
+3. شغّل: .\gradlew.bat assembleRelease
+
+
+حجم APK المتوقع
+================
+- Debug APK: ~15-20 MB
+- Release APK: ~8-12 MB (بعد الضغط والتحسين)
+
+
+استكشاف الأخطاء
+================
+
+❌ "Java not found"
+   → ثبّت Java JDK 17+
+
+❌ "SDK not found"
+   → حمّل Android SDK Command Line Tools
+
+❌ Build failed
+   → تحقق من اتصال الإنترنت
+   → شغّل: .\gradlew.bat clean
+   → أعد المحاولة
+
+❌ Out of memory
+   → أضف في gradle.properties:
+     org.gradle.jvmargs=-Xmx4g
+
+
+ملاحظات مهمة
+============
+✅ أول بناء يستغرق وقت أطول (تحميل التبعيات)
+✅ تحتاج إنترنت لأول بناء فقط
+✅ Debug APK للتجربة الشخصية
+✅ Release APK للنشر على المتاجر
+✅ APK يعمل على Android 8.0+ فقط
+
+
+للمساعدة
+========
+راجع ملف: QUICKSTART.md
+أو اقرأ: ARCHITECTURE.md
